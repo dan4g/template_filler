@@ -1,6 +1,7 @@
 import PySimpleGUI as sg
 from docxtpl import DocxTemplate
 import pandas as pd
+import os
 
 
 def select_menu():
@@ -8,11 +9,14 @@ def select_menu():
 
     layout = [[sg.Text('Select template and data files')],
 
-              [sg.Text('Choose template file (docx)', size=(20, 1)),
+              [sg.Text('Choose template file (docx)', size=(22, 1)),
                sg.Input(key='template', default_text='template'), sg.FileBrowse()],
 
-              [sg.Text('Choose data file (xlsx)', size=(20, 1)),
+              [sg.Text('Choose data file (xlsx)', size=(22, 1)),
                sg.Input(key='data', default_text='data'), sg.FileBrowse()],
+
+              [sg.Text('Choose folder to store results', size=(22, 1)),
+               sg.Input(key='path'), sg.FolderBrowse()],
 
               [sg.Text('Enter resulting file name')],
               [sg.Text('Files will be named "Your_text file_number"')],
@@ -35,15 +39,15 @@ def select_menu():
         if event == 'Ok':
             template = values['template']
             data = values['data']
-            name = values['name']
+            name = os.path.join(values['path'], values['name'])
             if 'xlsx' or 'XLSX' in data:
                 if 'docx' or 'DOCX' in template:
                     if name:
                         df = check_xlsx(data)
                         for i in df.index:
                             make_from_template(i, df, template, name)
-                            sg.one_line_progress_meter('Progress', i, len(df), 'key')
-                            sg.Popup('Ready!')
+                            sg.one_line_progress_meter('Progress', i+1, len(df), 'key')
+                        sg.Popup('Ready!')
                     else:
                         sg.popup('Name error', 'Enter name')
                 else:
